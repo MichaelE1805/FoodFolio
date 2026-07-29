@@ -19,7 +19,6 @@ struct AddPOIRestaurantView: View {
     @State private var existingRestaurant: Restaurant?
     
     @Binding var selectedRestaurant: Restaurant?
-    //@State private var navigateToRestaurant = false
     
     var body: some View {
         ScrollView {
@@ -80,14 +79,14 @@ struct AddPOIRestaurantView: View {
                 // Button changes depending if restaurant exists
                 if let restaurant = existingRestaurant {
 
-                    NavigationLink {
-                        RestaurantDetailView(restaurant: restaurant)
+                    Button {
+                        selectedRestaurant = restaurant
+                        dismiss()
                     } label: {
                         Text("Open Restaurant")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-
                 }
                 else {
                     
@@ -102,11 +101,6 @@ struct AddPOIRestaurantView: View {
             }
             .padding()
         }
-        /*.navigationDestination(isPresented: $navigateToRestaurant) {
-            if let restaurant = existingRestaurant {
-                RestaurantDetailView(restaurant: restaurant)
-            }
-        }*/
         .onAppear {
             checkIfRestaurantExists()
         }
