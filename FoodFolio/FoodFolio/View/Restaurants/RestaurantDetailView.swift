@@ -92,6 +92,27 @@ struct RestaurantDetailView: View {
 
 
         .navigationTitle(restaurant.name)
+        
+        VStack(alignment: .leading, spacing: 8) {
+
+            if let address = restaurant.address {
+                Label(address, systemImage: "location")
+            }
+
+            if let phone = restaurant.phoneNumber {
+                Label(phone, systemImage: "phone")
+            }
+
+            if let website = restaurant.website,
+               let url = URL(string: website) {
+                Link(destination: url) {
+                    Label("Website", systemImage: "globe")
+                }
+            }
+
+        }
+        .padding()
+        
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Button("Add Item") {

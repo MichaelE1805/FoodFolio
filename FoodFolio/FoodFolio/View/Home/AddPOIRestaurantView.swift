@@ -19,7 +19,7 @@ struct AddPOIRestaurantView: View {
     @State private var existingRestaurant: Restaurant?
     
     @Binding var selectedRestaurant: Restaurant?
-    @State private var navigateToRestaurant = false
+    //@State private var navigateToRestaurant = false
     
     var body: some View {
         ScrollView {
@@ -78,17 +78,18 @@ struct AddPOIRestaurantView: View {
                 
                 
                 // Button changes depending if restaurant exists
-                if existingRestaurant != nil {
-                    Button {
-                        selectedRestaurant = existingRestaurant
-                        dismiss()
+                if let restaurant = existingRestaurant {
+
+                    NavigationLink {
+                        RestaurantDetailView(restaurant: restaurant)
                     } label: {
                         Text("Open Restaurant")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    
-                } else {
+
+                }
+                else {
                     
                     Button {
                         addRestaurant()
@@ -101,11 +102,11 @@ struct AddPOIRestaurantView: View {
             }
             .padding()
         }
-        .navigationDestination(isPresented: $navigateToRestaurant) {
+        /*.navigationDestination(isPresented: $navigateToRestaurant) {
             if let restaurant = existingRestaurant {
                 RestaurantDetailView(restaurant: restaurant)
             }
-        }
+        }*/
         .onAppear {
             checkIfRestaurantExists()
         }
@@ -134,11 +135,21 @@ struct AddPOIRestaurantView: View {
     
     
     // Saves new restaurant
-    private func addRestaurant() {
+    /*private func addRestaurant() {
+        /*let restaurant = Restaurant(
+            name: mapItem.name ?? "Restaurant",
+            latitude: mapItem.placemark.coordinate.latitude,
+            longitude: mapItem.placemark.coordinate.longitude,
+            menuItems: []
+        )*/
+        
         let restaurant = Restaurant(
             name: mapItem.name ?? "Restaurant",
             latitude: mapItem.placemark.coordinate.latitude,
             longitude: mapItem.placemark.coordinate.longitude,
+            address: formattedAddress(),
+            phoneNumber: mapItem.phoneNumber,
+            website: mapItem.url?.absoluteString,
             menuItems: []
         )
         
@@ -151,6 +162,51 @@ struct AddPOIRestaurantView: View {
         } catch {
             print("Failed to save restaurant: \(error)")
         }
+    }*/
+    
+    private func addRestaurant() {
+        let restaurant = Restaurant(
+            name: mapItem.name ?? "Restaurant",
+            latitude: mapItem.placemark.coordinate.latitude,
+            longitude: mapItem.placemark.coordinate.longitude,
+            address: formattedAddress(),
+            phoneNumber: mapItem.phoneNumber,
+            website: mapItem.url?.absoluteString,
+            menuItems: []
+        )
+
+        print("Created:", restaurant.name)
+
+        context.insert(restaurant)
+
+        print("Inserted into context")
+
+        do {
+            try context.save()
+            print("Saved successfully")
+
+            let savedRestaurants = try context.fetch(FetchDescriptor<Restaurant>())
+            print("Fetched:", savedRestaurants.map { $0.name })
+
+        } catch {
+            print("SAVE ERROR:", error)
+        }
+        
+        do {
+            try context.save()
+            existingRestaurant = restaurant
+            
+        } catch {
+            print("Failed to save restaurant: \(error)")
+        }
+    }
+    
+    private func formattedAddress() -> String? {
+        guard let postalAddress = mapItem.placemark.postalAddress else {
+            return nil
+        }
+        
+        return "\(postalAddress.street), \(postalAddress.city), \(postalAddress.state) \(postalAddress.postalCode)"
     }
 }
 
